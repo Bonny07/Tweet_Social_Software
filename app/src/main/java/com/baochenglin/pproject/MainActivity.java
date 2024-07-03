@@ -27,20 +27,17 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 Fragment selectedFragment = null;
 
-                switch (item.getItemId()) {
-                    case R.id.navigation_home:
-                        selectedFragment = homeFragment;
-                        break;
-                    case R.id.navigation_search:
-                        selectedFragment = searchFragment;
-                        break;
-                    case R.id.navigation_notifications:
-                        selectedFragment = notificationsFragment;
-                        break;
-                    case R.id.navigation_edit:
-                        selectedFragment = editFragment;
-                        break;
+                int id = item.getItemId();
+                if (id == R.id.navigation_home) {
+                    selectedFragment = homeFragment;
+                } else if (id == R.id.navigation_search) {
+                    selectedFragment = searchFragment;
+                } else if (id == R.id.navigation_notifications) {
+                    selectedFragment = notificationsFragment;
+                } else if (id == R.id.navigation_edit) {
+                    selectedFragment = editFragment;
                 }
+
 
                 if (selectedFragment != null) {
                     fragmentManager.beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
