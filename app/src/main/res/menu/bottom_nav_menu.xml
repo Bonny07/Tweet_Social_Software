@@ -3,21 +3,21 @@
     <item
         android:id="@+id/navigation_home"
         android:icon="@drawable/homeicon"
-        android:title="主页"
+        android:title="home"
         android:checked="true" />
 
     <item
         android:id="@+id/navigation_search"
         android:icon="@drawable/searchicon"
-        android:title="搜索" />
+        android:title="search" />
 
     <item
-        android:id="@+id/navigation_follow"
+        android:id="@+id/navigation_notifications"
         android:icon="@drawable/bellicon"
-        android:title="关注" />
+        android:title="likes" />
 
     <item
-        android:id="@+id/navigation_mail"
+        android:id="@+id/navigation_edit"
         android:icon="@drawable/mailicon"
-        android:title="邮件" />
+        android:title="edit" />
 </menu>
