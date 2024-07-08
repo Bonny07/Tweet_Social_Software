@@ -10,26 +10,33 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final FragmentManager fragmentManager = getSupportFragmentManager();
-    private final Fragment homeFragment = new HomeFragment();
-    private final Fragment searchFragment = new SearchFragment();
-    private final Fragment notificationsFragment = new NotificationsFragment();
-    private final Fragment editFragment = new EditFragment();
+    private FragmentManager fragmentManager;
+    private HomeFragment homeFragment; // Changed to specific type to handle refresh directly
+    private Fragment searchFragment;
+    private Fragment notificationsFragment;
+    private Fragment editFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Initialize the fragments here to avoid issues with getActivity() in fragments
+        fragmentManager = getSupportFragmentManager();
+        homeFragment = new HomeFragment();
+        searchFragment = new SearchFragment();
+        notificationsFragment = new NotificationsFragment();
+        editFragment = new EditFragment();
+
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 Fragment selectedFragment = null;
-
                 int id = item.getItemId();
                 if (id == R.id.navigation_home) {
                     selectedFragment = homeFragment;
+                    homeFragment.refreshData();
                 } else if (id == R.id.navigation_search) {
                     selectedFragment = searchFragment;
                 } else if (id == R.id.navigation_notifications) {
@@ -37,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
                 } else if (id == R.id.navigation_edit) {
                     selectedFragment = editFragment;
                 }
-
 
                 if (selectedFragment != null) {
                     fragmentManager.beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
@@ -48,5 +54,13 @@ public class MainActivity extends AppCompatActivity {
 
         // Set default selection
         bottomNavigationView.setSelectedItemId(R.id.navigation_home);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (homeFragment.isVisible()) {
+            homeFragment.refreshData();
+        }
     }
 }
