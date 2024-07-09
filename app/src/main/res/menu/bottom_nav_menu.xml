@@ -12,9 +12,9 @@
         android:title="search" />
 
     <item
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/navigation_favorites"
         android:icon="@drawable/bellicon"
-        android:title="likes" />
+        android:title="favorite" />
 
     <item
         android:id="@+id/navigation_edit"

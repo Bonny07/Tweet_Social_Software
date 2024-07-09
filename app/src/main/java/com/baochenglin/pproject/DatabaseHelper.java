@@ -3,8 +3,10 @@ package com.baochenglin.pproject;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -137,6 +139,112 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String[] selectionArgs = new String[] {"%" + query + "%", "%" + query + "%"};
 
         return db.query(TABLE_POSTS, columns, selection, selectionArgs, null, null, null);
+    }
+
+    // 添加收藏
+    public boolean addFavorite(String username, int postId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TABLE_USERS, new String[]{COLUMN_FAVORITES},
+                    COLUMN_USERNAME + "=?", new String[]{username}, null, null, null);
+
+            String currentFavorites;
+            if (cursor != null && cursor.moveToFirst()) {
+                currentFavorites = cursor.getString(cursor.getColumnIndex(COLUMN_FAVORITES));
+            } else {
+                Log.d("DatabaseHelper", "User not found or no favorites column value.");
+                return false;  // 用户不存在或收藏列为空
+            }
+
+            String updatedFavorites = currentFavorites == null || currentFavorites.isEmpty() ? String.valueOf(postId) :
+                    currentFavorites + "," + postId;
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_FAVORITES, updatedFavorites);
+
+            int rowsUpdated = db.update(TABLE_USERS, values, COLUMN_USERNAME + "=?", new String[]{username});
+            return rowsUpdated > 0;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+    }
+
+
+
+
+    // 移除收藏
+    public boolean removeFavorite(String username, int postId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TABLE_USERS, new String[]{COLUMN_FAVORITES},
+                    COLUMN_USERNAME + "=?", new String[]{username}, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                String currentFavorites = cursor.getString(cursor.getColumnIndex(COLUMN_FAVORITES));
+                String[] favoritesArray = currentFavorites.split(",");
+                StringBuilder updatedFavorites = new StringBuilder();
+                for (String id : favoritesArray) {
+                    if (!id.equals(String.valueOf(postId))) {
+                        if (updatedFavorites.length() > 0) updatedFavorites.append(",");
+                        updatedFavorites.append(id);
+                    }
+                }
+                ContentValues values = new ContentValues();
+                values.put(COLUMN_FAVORITES, updatedFavorites.toString());
+                db.update(TABLE_USERS, values, COLUMN_USERNAME + "=?", new String[]{username});
+                return true;
+            }
+            return false;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+    }
+
+    public Cursor getFavoritesByUsername(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            String ids = getUserFavorites(username);
+            if (!ids.isEmpty()) {
+                cursor = db.query(TABLE_POSTS, null, COLUMN_ID + " IN (" + ids + ")", null, null, null, null);
+            } else {
+                // 创建一个空的MatrixCursor，避免返回null
+                String[] columns = {COLUMN_ID, COLUMN_AUTHOR, COLUMN_TIME, COLUMN_CONTENT};
+                cursor = new MatrixCursor(columns);
+            }
+            return cursor;
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error fetching favorites", e);
+            return null; // 如果发生异常，返回null
+        } finally {
+            // 注意不要在这里关闭数据库连接
+            // db.close();  // 不在这里关闭数据库连接
+        }
+    }
+
+    private String getUserFavorites(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TABLE_USERS, new String[]{COLUMN_FAVORITES},
+                    COLUMN_USERNAME + "=?", new String[]{username}, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                return cursor.getString(cursor.getColumnIndex(COLUMN_FAVORITES));
+            }
+            return ""; // Return empty string if no favorites
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            // db.close(); // 不在这里关闭数据库连接
+        }
     }
 
 

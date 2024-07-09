@@ -19,6 +19,17 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
+        android:id="@+id/imageViewBird"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_bird"
+        app:layout_constraintTop_toTopOf="@id/imageViewProfile"
+        app:layout_constraintBottom_toBottomOf="@id/imageViewProfile"
+        app:layout_constraintStart_toEndOf="@id/imageViewProfile"
+        app:layout_constraintEnd_toStartOf="@id/imageViewSettings"
+        app:layout_constraintHorizontal_bias="0.5" />
+
+    <ImageView
         android:id="@+id/imageViewSettings"
         android:layout_width="48dp"
         android:layout_height="48dp"

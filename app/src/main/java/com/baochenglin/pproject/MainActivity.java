@@ -14,11 +14,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class MainActivity extends AppCompatActivity {
 
     private FragmentManager fragmentManager;
-    private HomeFragment homeFragment; // Specified for refresh
+    private HomeFragment homeFragment;
     private Fragment searchFragment;
-
+    private FavoritesFragment favoriteFragment;  // 应使用 FavoritesFragment 类型，假设它是 Fragment 的子类
     private Fragment editFragment;
-    private Fragment currentFragment; // Track the current fragment
+    private Fragment currentFragment;
     private ImageView imageViewSettings;
 
     @Override
@@ -29,9 +29,9 @@ public class MainActivity extends AppCompatActivity {
         fragmentManager = getSupportFragmentManager();
         homeFragment = new HomeFragment();
         searchFragment = new SearchFragment();
-
+        favoriteFragment = new FavoritesFragment();  // 确保已正确实例化
         editFragment = new EditFragment();
-        currentFragment = homeFragment; // Initialize with homeFragment as the default
+        currentFragment = homeFragment;
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -43,20 +43,21 @@ public class MainActivity extends AppCompatActivity {
                     selectedFragment = homeFragment;
                 } else if (id == R.id.navigation_search) {
                     selectedFragment = searchFragment;
+                } else if (id == R.id.navigation_favorites) {
+                    selectedFragment = favoriteFragment;
                 } else if (id == R.id.navigation_edit) {
                     selectedFragment = editFragment;
                 }
 
-                // Only change fragments if a new fragment is selected
                 if (selectedFragment != null && currentFragment != selectedFragment) {
-                    currentFragment = selectedFragment; // Update current fragment
+                    currentFragment = selectedFragment;
                     fragmentManager.beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
                 }
                 return true;
             }
         });
 
-        // Set default selection and load the home fragment initially
+        // Set the default selection
         if (savedInstanceState == null) {
             bottomNavigationView.setSelectedItemId(R.id.navigation_home);
             fragmentManager.beginTransaction().replace(R.id.fragment_container, homeFragment).commit();
