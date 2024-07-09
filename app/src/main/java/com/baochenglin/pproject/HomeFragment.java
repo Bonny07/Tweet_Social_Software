@@ -1,5 +1,7 @@
 package com.baochenglin.pproject;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
@@ -15,6 +17,7 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private PostAdapter postAdapter;
     private DatabaseHelper databaseHelper;
+    private String currentUsername = "current_user_username"; // Replace with actual logic to get the current username
 
     public HomeFragment() {
         // Required empty public constructor
@@ -27,8 +30,13 @@ public class HomeFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        // 从 SharedPreferences 中获取当前用户名
+        SharedPreferences prefs = getContext().getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+        currentUsername = prefs.getString("loggedInUsername", null);
+
         databaseHelper = new DatabaseHelper(getContext());
-        postAdapter = new PostAdapter(new ArrayList<>()); // 假设适配器需要一个列表
+        ArrayList<Post> initialPosts = new ArrayList<>();
+        postAdapter = new PostAdapter(initialPosts, databaseHelper, currentUsername);
         recyclerView.setAdapter(postAdapter);
 
         loadPosts();
@@ -38,7 +46,7 @@ public class HomeFragment extends Fragment {
 
     private void loadPosts() {
         Cursor cursor = databaseHelper.getAllPosts();
-        ArrayList<Post> posts = new ArrayList<>(); // 假设有一个 Post 类来处理数据
+        ArrayList<Post> posts = new ArrayList<>();
         while (cursor.moveToNext()) {
             int id = cursor.getInt(cursor.getColumnIndex("_id"));
             String author = cursor.getString(cursor.getColumnIndex("author"));
@@ -60,14 +68,23 @@ public class HomeFragment extends Fragment {
     public void refreshData() {
         // 此处添加获取最新数据并更新适配器的代码
         if (postAdapter != null) {
-            ArrayList<Post> newPosts = fetchDataFromDatabase();  // 假设您有一个方法来获取数据
+            ArrayList<Post> newPosts = fetchDataFromDatabase();
             postAdapter.setPosts(newPosts);
             postAdapter.notifyDataSetChanged();
         }
     }
 
     private ArrayList<Post> fetchDataFromDatabase() {
-        // 这里应实现从数据库获取数据的逻辑
-        return new ArrayList<>();  // 返回新的数据列表
+        ArrayList<Post> newPosts = new ArrayList<>();
+        Cursor cursor = databaseHelper.getAllPosts();
+        while (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndex("_id"));
+            String author = cursor.getString(cursor.getColumnIndex("author"));
+            String time = cursor.getString(cursor.getColumnIndex("time"));
+            String content = cursor.getString(cursor.getColumnIndex("content"));
+            newPosts.add(new Post(id, author, time, content)); // 添加到列表
+        }
+        cursor.close();
+        return newPosts;
     }
 }
