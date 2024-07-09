@@ -14,10 +14,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class MainActivity extends AppCompatActivity {
 
     private FragmentManager fragmentManager;
-    private HomeFragment homeFragment; // Changed to specific type to handle refresh directly
+    private HomeFragment homeFragment; // Specified for refresh
     private Fragment searchFragment;
-    private Fragment notificationsFragment;
+
     private Fragment editFragment;
+    private Fragment currentFragment; // Track the current fragment
     private ImageView imageViewSettings;
 
     @Override
@@ -25,11 +26,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize the fragments here to avoid issues with getActivity() in fragments
         fragmentManager = getSupportFragmentManager();
         homeFragment = new HomeFragment();
         searchFragment = new SearchFragment();
+
         editFragment = new EditFragment();
+        currentFragment = homeFragment; // Initialize with homeFragment as the default
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -39,31 +41,31 @@ public class MainActivity extends AppCompatActivity {
                 int id = item.getItemId();
                 if (id == R.id.navigation_home) {
                     selectedFragment = homeFragment;
-                    homeFragment.refreshData();
                 } else if (id == R.id.navigation_search) {
                     selectedFragment = searchFragment;
-                } else if (id == R.id.navigation_notifications) {
-                    selectedFragment = notificationsFragment;
                 } else if (id == R.id.navigation_edit) {
                     selectedFragment = editFragment;
                 }
 
-                if (selectedFragment != null) {
+                // Only change fragments if a new fragment is selected
+                if (selectedFragment != null && currentFragment != selectedFragment) {
+                    currentFragment = selectedFragment; // Update current fragment
                     fragmentManager.beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
                 }
                 return true;
             }
         });
 
-        // Set default selection
-        bottomNavigationView.setSelectedItemId(R.id.navigation_home);
+        // Set default selection and load the home fragment initially
+        if (savedInstanceState == null) {
+            bottomNavigationView.setSelectedItemId(R.id.navigation_home);
+            fragmentManager.beginTransaction().replace(R.id.fragment_container, homeFragment).commit();
+        }
 
-        // Setting ImageView and OnClickListener
         imageViewSettings = findViewById(R.id.imageViewSettings);
         imageViewSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Navigate to the settings page
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(intent);
             }
