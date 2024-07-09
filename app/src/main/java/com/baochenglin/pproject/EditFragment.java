@@ -36,7 +36,7 @@ public class EditFragment extends Fragment {
         int[] to = new int[]{R.id.authorTextView, R.id.timeTextView, R.id.contentTextView};
 
         adapter = new SimpleCursorAdapter(getActivity(),
-                R.layout.list_item_editable,  // 使用可编辑的列表项布局
+                R.layout.list_item_editable,
                 null,
                 from,
                 to,

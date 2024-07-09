@@ -86,6 +86,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    public Cursor searchPosts(String query) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {COLUMN_ID + " AS _id", COLUMN_AUTHOR, COLUMN_TIME, COLUMN_CONTENT};
+        String selection = COLUMN_AUTHOR + " LIKE ? OR " + COLUMN_CONTENT + " LIKE ?";
+        String[] selectionArgs = new String[] {"%" + query + "%", "%" + query + "%"};
+
+        return db.query(TABLE_POSTS, columns, selection, selectionArgs, null, null, null);
+    }
+
+
 
 
 }
