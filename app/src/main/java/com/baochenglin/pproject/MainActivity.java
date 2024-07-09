@@ -4,8 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -15,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
     private Fragment searchFragment;
     private Fragment notificationsFragment;
     private Fragment editFragment;
+    private ImageView imageViewSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
         fragmentManager = getSupportFragmentManager();
         homeFragment = new HomeFragment();
         searchFragment = new SearchFragment();
-        notificationsFragment = new NotificationsFragment();
         editFragment = new EditFragment();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
@@ -54,6 +57,17 @@ public class MainActivity extends AppCompatActivity {
 
         // Set default selection
         bottomNavigationView.setSelectedItemId(R.id.navigation_home);
+
+        // Setting ImageView and OnClickListener
+        imageViewSettings = findViewById(R.id.imageViewSettings);
+        imageViewSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to the settings page
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override

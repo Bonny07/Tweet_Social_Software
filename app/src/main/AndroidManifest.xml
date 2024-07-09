@@ -44,13 +44,10 @@
             android:name=".EditFragment"
             android:exported="false" />
         <activity
-            android:name=".NotificationsFragment"
-            android:exported="false" />
-        <activity
             android:name=".SearchFragment"
             android:exported="false" />
         <activity
-            android:name=".SettingsFragment"
+            android:name=".SettingsActivity"
             android:exported="false" />
         <activity
             android:name=".HomeFragment"
