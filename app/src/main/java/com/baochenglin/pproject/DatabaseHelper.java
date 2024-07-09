@@ -9,12 +9,17 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "PostsDatabase";
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String TABLE_POSTS = "posts";
+    public static final String TABLE_USERS = "users";
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_AUTHOR = "author";
     public static final String COLUMN_TIME = "time";
     public static final String COLUMN_CONTENT = "content";
+    public static final String COLUMN_USERNAME = "username";
+    public static final String COLUMN_PHONE = "phone";
+    public static final String COLUMN_PASSWORD = "password";
+    public static final String COLUMN_FAVORITES = "favorites";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -28,11 +33,50 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + COLUMN_TIME + " TEXT,"
                 + COLUMN_CONTENT + " TEXT" + ")";
         db.execSQL(CREATE_POSTS_TABLE);
+        String CREATE_USERS_TABLE = "CREATE TABLE " + TABLE_USERS + "("
+                + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COLUMN_USERNAME + " TEXT UNIQUE,"
+                + COLUMN_PHONE + " TEXT,"
+                + COLUMN_PASSWORD + " TEXT,"
+                + COLUMN_FAVORITES + " TEXT" + ")";
+        db.execSQL(CREATE_USERS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_POSTS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
+        onCreate(db);
+    }
 
+    public boolean addUser(String username, String phone, String password) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_USERNAME, username);
+        values.put(COLUMN_PHONE, phone);
+        values.put(COLUMN_PASSWORD, password);
+        values.put(COLUMN_FAVORITES, "");  // 初始化时无收藏
+
+        long result = db.insert(TABLE_USERS, null, values);
+        db.close();
+        return result != -1;  // 如果用户添加成功，返回 true
+    }
+
+    // 更新用户收藏
+    public boolean updateUserFavorites(String username, String favorites) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_FAVORITES, favorites);
+
+        int result = db.update(TABLE_USERS, values, COLUMN_USERNAME + " = ?", new String[]{username});
+        db.close();
+        return result > 0;
+    }
+
+    // 通过用户名获取用户信息
+    public Cursor getUserByUsername(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.query(TABLE_USERS, null, COLUMN_USERNAME + " = ?", new String[]{username}, null, null, null);
     }
 
     public void addPost(String author, String time, String content) {
