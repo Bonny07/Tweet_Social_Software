@@ -47,10 +47,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor getAllPosts() {
         SQLiteDatabase db = this.getReadableDatabase();
-        // 确保查询结果包含名为 "_id" 的列，这是 CursorAdapter 所必需的
         String[] columns = { COLUMN_ID + " AS _id", COLUMN_AUTHOR, COLUMN_TIME, COLUMN_CONTENT };
         return db.query(TABLE_POSTS, columns, null, null, null, null, null);
     }
+
 
 
     public Cursor getPost(int id) {
@@ -76,6 +76,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.update(TABLE_POSTS, values, COLUMN_ID + "=?", new String[]{String.valueOf(id)});
         db.close();
     }
+
+    public void deletePost(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            db.delete(TABLE_POSTS, COLUMN_ID + "=?", new String[]{String.valueOf(id)});
+        } finally {
+            db.close();
+        }
+    }
+
+
 
 }
 

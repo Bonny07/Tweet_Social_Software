@@ -1,9 +1,9 @@
 package com.baochenglin.pproject;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +13,7 @@ import android.widget.SimpleCursorAdapter;
 import androidx.fragment.app.Fragment;
 
 public class EditFragment extends Fragment {
-    private DatabaseHelper dbHelper;
+    private DatabaseHelper dbHelper;  // 声明为成员变量
     private ListView listViewPosts;
     private SimpleCursorAdapter adapter;
 
@@ -22,42 +22,40 @@ public class EditFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_edit, container, false);
 
-        dbHelper = new DatabaseHelper(getContext());
+        dbHelper = new DatabaseHelper(getContext());  // 初始化数据库帮助类
         listViewPosts = view.findViewById(R.id.listViewPosts);
 
-        // Setup for the add button
+        // 设置添加帖子按钮的点击事件
         Button addButton = view.findViewById(R.id.buttonAddPost);
         addButton.setOnClickListener(v -> {
             startActivity(new Intent(getActivity(), AddPostActivity.class));
         });
 
-        // Configuring the adapter for the list
+        // 配置 SimpleCursorAdapter
         String[] from = new String[]{DatabaseHelper.COLUMN_AUTHOR, DatabaseHelper.COLUMN_TIME, DatabaseHelper.COLUMN_CONTENT};
         int[] to = new int[]{R.id.authorTextView, R.id.timeTextView, R.id.contentTextView};
 
         adapter = new SimpleCursorAdapter(getActivity(),
-                R.layout.list_item_post, // The layout of each list item
-                null, // Start with no cursor
+                R.layout.list_item_editable,  // 使用可编辑的列表项布局
+                null,
                 from,
                 to,
-                0);
+                0) {
+            @Override
+            public View newView(Context context, Cursor cursor, ViewGroup parent) {
+                View view = super.newView(context, cursor, parent);
+                configureButtons(view, cursor);
+                return view;
+            }
+
+            @Override
+            public void bindView(View view, Context context, Cursor cursor) {
+                super.bindView(view, context, cursor);
+            }
+        };
 
         listViewPosts.setAdapter(adapter);
         updateListView();
-
-        listViewPosts.setOnItemClickListener((parent, view1, position, id) -> {
-            Cursor cursor = (Cursor) listViewPosts.getItemAtPosition(position);
-            int indexId = cursor.getColumnIndex(DatabaseHelper.COLUMN_ID); // 获取 COLUMN_ID 的索引
-            if (indexId != -1) { // 确保索引有效
-                int postId = cursor.getInt(indexId);
-                Intent intent = new Intent(getActivity(), EditPostActivity.class);
-                intent.putExtra("POST_ID", postId);
-                startActivity(intent);
-            } else {
-                // 可以处理错误或记录日志
-                Log.e("EditFragment", "Invalid column index for ID.");
-            }
-        });
 
         return view;
     }
@@ -71,5 +69,24 @@ public class EditFragment extends Fragment {
     private void updateListView() {
         Cursor cursor = dbHelper.getAllPosts();
         adapter.changeCursor(cursor);
+        adapter.notifyDataSetChanged();
+    }
+
+    private void configureButtons(View view, Cursor cursor) {
+        Button editButton = view.findViewById(R.id.buttonEdit);
+        Button deleteButton = view.findViewById(R.id.buttonDelete);
+
+        editButton.setOnClickListener(v -> {
+            int postId = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_ID));
+            Intent intent = new Intent(getActivity(), EditPostActivity.class);
+            intent.putExtra("POST_ID", postId);
+            startActivity(intent);
+        });
+
+        deleteButton.setOnClickListener(v -> {
+            int postId = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_ID));
+            dbHelper.deletePost(postId);
+            updateListView();
+        });
     }
 }
