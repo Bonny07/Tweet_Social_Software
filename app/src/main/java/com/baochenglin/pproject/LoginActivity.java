@@ -1,6 +1,7 @@
 package com.baochenglin.pproject;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -45,8 +46,10 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        if (loginUser(phoneOrUsername, password)) {
+        String username = loginUser(phoneOrUsername, password);
+        if (username != null) {
             Toast.makeText(this, "Login successful.", Toast.LENGTH_SHORT).show();
+            saveLoggedInUser(username);
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
         } else {
@@ -54,15 +57,25 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private boolean loginUser(String phoneOrUsername, String password) {
+    private String loginUser(String phoneOrUsername, String password) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String[] columns = {DatabaseHelper.COLUMN_ID};
+        String[] columns = {DatabaseHelper.COLUMN_USERNAME};
         String selection = "(username = ? OR phone = ?) AND password = ?";
         String[] selectionArgs = new String[] {phoneOrUsername, phoneOrUsername, password};
 
         Cursor cursor = db.query(DatabaseHelper.TABLE_USERS, columns, selection, selectionArgs, null, null, null);
-        boolean loggedIn = cursor.getCount() > 0;
+        String username = null;
+        if (cursor.moveToFirst()) {
+            username = cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_USERNAME));
+        }
         cursor.close();
-        return loggedIn;
+        return username;
+    }
+
+    private void saveLoggedInUser(String username) {
+        SharedPreferences sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("loggedInUsername", username);
+        editor.apply();
     }
 }
